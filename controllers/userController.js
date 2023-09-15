@@ -12,9 +12,7 @@ module.exports = {
     // get all users
     async getUsers(req, res) {
         try {
-            const users = await User.find()
-                .populate('thoughts')
-                .populate('friends');
+            const users = await User.find();
             res.json(users);
         } catch (err) {
             res.status(500).json(err);
@@ -76,7 +74,7 @@ module.exports = {
                 return res.status(404).json({ message: 'Nobodies here...' });
             }
 
-            await User.deleteMany({ _id: { $in: user.users } });
+          
             res.json({ message: 'User deleted successfully!' });
         } catch (err) {
             res.status(500).json(err);

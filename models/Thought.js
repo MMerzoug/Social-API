@@ -1,8 +1,8 @@
-const mongoose = require('mongoose');
+const {Schema, model} = require('mongoose');
 const dateFormat = require('../utils/dateFormat');
 const reactionSchema = require('./Reaction');
 
-const thoughtSchema = new mongoose.Schema(
+const thoughtSchema = new Schema(
     {
         thoughtText: {
             type: String,
@@ -32,10 +32,11 @@ const thoughtSchema = new mongoose.Schema(
     }
 );
 
-thoughtSchema.virtuals('reactionCount').get(function(){
+thoughtSchema.virtual('reactionCount').get(function(){
     return this.reactions.length
 });
 
+// Need to add mongoose .model because we are not decosntruction our import
 const Thought = model ('Thought', thoughtSchema);
 
 module.exports = Thought;

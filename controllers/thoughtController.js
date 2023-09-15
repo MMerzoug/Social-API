@@ -37,11 +37,19 @@ module.exports = {
     },
 
     // create a thought
-    // still need to do...update user to pass the idea into the users array of thoughts
+    // still need to do...update user to pass the id into the users array of thoughts
     async createThought(req, res) {
         try {
             const thought = await Thought.create(req.body);
-            reactionSchema.json(thought);
+
+            const userData = await User.findOneAndUpdate(
+                { _id: req.body.userId },
+                { $push: { thoughts: thought._id} },
+                { new: true }
+                );
+
+            res.json(userData);
+
         } catch (err) {
             console.log(err);
             return res.status(500).json(err);
@@ -75,10 +83,49 @@ module.exports = {
                 return res.status(404).json({ message: 'No thoughts here...' });
             }
 
-            await User.deleteMany({ _id: { $in: thought.users } });
-            res.json({ message: 'Thought and users deleted successfully!' });
+            await User.findOneAndUpdate(
+                { thoughts: req.params.thoughtId},
+                {$pull: {thoughts: req.params.thoughtId}},
+                {new: true}
+                );
+
+
+            res.json({ message: 'Thought deleted successfully!' });
         } catch (err) {
             res.status(500).json(err);
         }
     },
+
+    // addReaction
+    // Look at add friend
+async addReaction(req, res) {
+    try {
+        const reaction = await Thought.findOneAndUpdate (
+            { _id: req.params.thoughtId},
+            {$push: {reactions: req.body}},
+            {new: true}
+
+            )
+            res.json(reaction)
+    } catch (err) {
+        res.status(500).json(err);
+    }
+},
+
+// removeReaction
+// Look at delete a friend
+async removeReaction (req, res) {
+    try {
+        const reaction = await Thought.findOneAndUpdate(
+            { _id: req.params.thoughtId},
+            {$pull: {reactions: {reactionId: req.params.reactionId}}},
+            {new: true}
+        )
+        res.json ({message: 'Reaction has been removed.'})
+    } catch (err) {
+        res.status(500).json(err);
+    }
+
+},
+
 };
