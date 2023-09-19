@@ -14,7 +14,7 @@ module.exports = {
     async getThoughts(req, res) {
         try {
             const thoughts = await Thought.find();
-            reactionSchema.json(thoughts);
+            res.json(thoughts);
         } catch (err) {
             res.status(500).json(err);
         }
@@ -23,8 +23,7 @@ module.exports = {
     // get 1 thought
     async getSingleThought(req, res) {
         try {
-            const thought = await Thought.findOne({ _id: req.params.thoughtId })
-                .select('__v');
+            const thought = await Thought.findOne({ _id: req.params.thoughtId });
 
             if (!thought) {
                 return res.status(404).json({ message: 'No thoughts here...' });
@@ -68,7 +67,8 @@ module.exports = {
             if (!thought) {
                 return res.status(404).json({ message: 'No thoughts here...' });
             }
-            res.json(course);
+
+            res.json(thought);
         } catch (err) {
             res.status(500).json(err);
         }
@@ -116,16 +116,19 @@ async addReaction(req, res) {
 // Look at delete a friend
 async removeReaction (req, res) {
     try {
-        const reaction = await Thought.findOneAndUpdate(
+        const thought = await Thought.findOneAndUpdate(
             { _id: req.params.thoughtId},
-            {$pull: {reactions: {reactionId: req.params.reactionId}}},
+            {$pull: {reactions: {reactionId: ObjectId(req.params.reactionId)}}},
             {new: true}
-        )
+        );
+        if (!thought) {
+            return res.status(404).json({message: "No thought found with this ID!"});
+        }
+
         res.json ({message: 'Reaction has been removed.'})
     } catch (err) {
         res.status(500).json(err);
     }
-
 },
 
 };
